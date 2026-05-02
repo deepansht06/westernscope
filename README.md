@@ -12,8 +12,9 @@ A course review and information site for Western University, inspired by [uwflow
 
 ## Tech stack
 
-- **Framework:** Next.js 14 (App Router) + TypeScript
-- **Styling:** Tailwind CSS + shadcn/ui
+- **Framework:** Next.js 16 (App Router) + React 19 + TypeScript
+- **Styling:** Tailwind CSS v4
+- **UI components:** shadcn/ui (planned)
 - **Database:** Postgres (via Supabase)
 - **Auth:** Supabase Auth (Google OAuth, restricted to `@uwo.ca`)
 - **Hosting:** Vercel
@@ -25,4 +26,17 @@ Early development. See [issues](../../issues) and [milestones](../../milestones)
 
 ## Local development
 
-_Setup instructions will be added once the Next.js project is scaffolded._
+Requires Node.js 20+.
+
+```bash
+npm install
+npm run dev
+```
+
+Then open http://localhost:3000.
+
+Other scripts:
+
+- `npm run build` — production build
+- `npm run start` — run the production build
+- `npm run lint` — ESLint
