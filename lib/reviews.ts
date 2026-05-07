@@ -1,0 +1,65 @@
+import { createClient } from "@/lib/supabase/server";
+
+export type Review = {
+  id: string;
+  user_id: string;
+  course_id: string;
+  liked: boolean | null;
+  useful: boolean | null;
+  easy: boolean | null;
+  text: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ReviewSummary = {
+  count: number;
+  liked: number;
+  useful: number;
+  easy: number;
+};
+
+export async function listReviewsForCourse(courseId: string): Promise<Review[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("reviews")
+    .select(
+      "id, user_id, course_id, liked, useful, easy, text, created_at, updated_at",
+    )
+    .eq("course_id", courseId)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`listReviewsForCourse: ${error.message}`);
+  return data ?? [];
+}
+
+export async function getMyReviewForCourse(
+  courseId: string,
+  userId: string,
+): Promise<Review | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("reviews")
+    .select(
+      "id, user_id, course_id, liked, useful, easy, text, created_at, updated_at",
+    )
+    .eq("course_id", courseId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw new Error(`getMyReviewForCourse: ${error.message}`);
+  return data;
+}
+
+export function summarizeReviews(reviews: Review[]): ReviewSummary {
+  const pct = (key: "liked" | "useful" | "easy") => {
+    const total = reviews.filter((r) => r[key] !== null).length;
+    if (total === 0) return 0;
+    const yes = reviews.filter((r) => r[key] === true).length;
+    return Math.round((yes / total) * 100);
+  };
+  return {
+    count: reviews.length,
+    liked: pct("liked"),
+    useful: pct("useful"),
+    easy: pct("easy"),
+  };
+}

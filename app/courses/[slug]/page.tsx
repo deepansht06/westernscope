@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getCourseByCode } from "@/lib/courses";
 import { slugToCode } from "@/lib/slug";
+import { getCurrentUser, isUwoEmail } from "@/lib/auth";
+import { getMyReviewForCourse } from "@/lib/reviews";
+import { ReviewList } from "@/components/ReviewList";
+import { ReviewForm } from "@/components/ReviewForm";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -25,6 +29,12 @@ export default async function CoursePage({ params }: Props) {
 
   const course = await getCourseByCode(code);
   if (!course) notFound();
+
+  const user = await getCurrentUser();
+  const canReview = !!user && isUwoEmail(user.email);
+  const myReview = canReview
+    ? await getMyReviewForCourse(course.id, user!.id)
+    : null;
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
@@ -72,13 +82,40 @@ export default async function CoursePage({ params }: Props) {
         </section>
       )}
 
-      <section className="mt-12 rounded-lg border border-dashed border-zinc-300 p-8 text-center dark:border-zinc-700">
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-          No reviews yet
+      <section className="mt-12">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          Reviews
         </h2>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Reviews open once Google sign-in for @uwo.ca accounts is enabled.
-        </p>
+        <div className="mt-3">
+          <ReviewList courseId={course.id} />
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          {myReview ? "Your review" : "Write a review"}
+        </h2>
+        <div className="mt-3">
+          {!user && (
+            <div className="rounded-lg border border-zinc-200 p-6 text-sm text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
+              Sign in with your <span className="font-medium">@uwo.ca</span>{" "}
+              email to post a review.
+            </div>
+          )}
+          {user && !canReview && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+              Reviews are limited to <span className="font-medium">@uwo.ca</span>{" "}
+              accounts. You&apos;re signed in as {user.email}.
+            </div>
+          )}
+          {canReview && (
+            <ReviewForm
+              courseId={course.id}
+              courseSlug={slug}
+              existing={myReview}
+            />
+          )}
+        </div>
       </section>
     </div>
   );
