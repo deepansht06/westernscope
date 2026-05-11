@@ -17,13 +17,15 @@ export async function ReviewList({ courseId }: { courseId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-950">
-        <Stat label="Liked" pct={summary.liked} />
-        <Stat label="Useful" pct={summary.useful} />
-        <Stat label="Easy" pct={summary.easy} />
-        <span className="text-zinc-500 dark:text-zinc-400">
-          {summary.count} {summary.count === 1 ? "review" : "reviews"}
-        </span>
+      <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="mb-3 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+          Based on {summary.count} {summary.count === 1 ? "review" : "reviews"}
+        </div>
+        <div className="space-y-2">
+          <Bar label="Liked" pct={summary.liked} />
+          <Bar label="Useful" pct={summary.useful} />
+          <Bar label="Easy" pct={summary.easy} />
+        </div>
       </div>
       <ul className="space-y-3">
         {reviews.map((r) => (
@@ -56,13 +58,19 @@ export async function ReviewList({ courseId }: { courseId: string }) {
   );
 }
 
-function Stat({ label, pct }: { label: string; pct: number }) {
+function Bar({ label, pct }: { label: string; pct: number }) {
   return (
-    <div className="flex items-baseline gap-1">
-      <span className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+    <div className="grid grid-cols-[5rem_1fr_3rem] items-center gap-3 text-sm">
+      <span className="text-zinc-600 dark:text-zinc-400">{label}</span>
+      <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+        <div
+          className="h-full rounded-full bg-[#4F2683] dark:bg-[#A78BFA]"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className="text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
         {pct}%
       </span>
-      <span className="text-zinc-500 dark:text-zinc-400">{label}</span>
     </div>
   );
 }

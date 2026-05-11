@@ -2,11 +2,13 @@ import Link from "next/link";
 import { SearchInput } from "@/components/SearchInput";
 import { CourseCard } from "@/components/CourseCard";
 import { listCourses, countCourses } from "@/lib/courses";
+import { countReviews } from "@/lib/reviews";
 
 export default async function Home() {
-  const [recent, total] = await Promise.all([
+  const [recent, total, totalReviews] = await Promise.all([
     listCourses({ limit: 6 }),
     countCourses(),
+    countReviews(),
   ]);
 
   return (
@@ -16,7 +18,16 @@ export default async function Home() {
           Find the right course at <span className="text-[#4F2683] dark:text-[#A78BFA]">Western</span>.
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
-          Browse {total.toLocaleString()} courses and read honest reviews from fellow Mustangs.
+          Browse {total.toLocaleString()} courses
+          {totalReviews > 0 ? (
+            <>
+              {" "}and {totalReviews.toLocaleString()}{" "}
+              {totalReviews === 1 ? "review" : "reviews"}
+            </>
+          ) : (
+            ""
+          )}{" "}
+          from fellow Mustangs.
         </p>
         <div className="mx-auto mt-8 max-w-xl">
           <SearchInput placeholder="Try “COMPSCI 1027A/B” or “data structures”…" />

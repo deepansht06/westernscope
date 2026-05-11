@@ -84,6 +84,15 @@ export async function listMyReviews(userId: string): Promise<MyReview[]> {
   });
 }
 
+export async function countReviews(): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("reviews")
+    .select("id", { count: "exact", head: true });
+  if (error) throw new Error(`countReviews: ${error.message}`);
+  return count ?? 0;
+}
+
 export function summarizeReviews(reviews: Review[]): ReviewSummary {
   const pct = (key: "liked" | "useful" | "easy") => {
     const total = reviews.filter((r) => r[key] !== null).length;
