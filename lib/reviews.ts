@@ -19,6 +19,10 @@ export type ReviewSummary = {
   easy: number;
 };
 
+export type MyReview = Review & {
+  course: { code: string; title: string };
+};
+
 export async function listReviewsForCourse(courseId: string): Promise<Review[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -47,6 +51,37 @@ export async function getMyReviewForCourse(
     .maybeSingle();
   if (error) throw new Error(`getMyReviewForCourse: ${error.message}`);
   return data;
+}
+
+export async function listMyReviews(userId: string): Promise<MyReview[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("reviews")
+    .select(
+      "id, user_id, course_id, liked, useful, easy, text, created_at, updated_at, courses(code, title)",
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`listMyReviews: ${error.message}`);
+  return (data ?? []).map((r) => {
+    const courseRel = r.courses as unknown as
+      | { code: string; title: string }
+      | { code: string; title: string }[]
+      | null;
+    const course = Array.isArray(courseRel) ? courseRel[0] : courseRel;
+    return {
+      id: r.id,
+      user_id: r.user_id,
+      course_id: r.course_id,
+      liked: r.liked,
+      useful: r.useful,
+      easy: r.easy,
+      text: r.text,
+      created_at: r.created_at,
+      updated_at: r.updated_at,
+      course: { code: course?.code ?? "", title: course?.title ?? "" },
+    };
+  });
 }
 
 export function summarizeReviews(reviews: Review[]): ReviewSummary {

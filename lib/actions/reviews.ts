@@ -63,3 +63,27 @@ export async function submitReview(
   revalidatePath(`/courses/${courseSlug}`);
   return { ok: true };
 }
+
+export async function deleteReview(formData: FormData): Promise<void> {
+  const courseId = formData.get("course_id");
+  if (typeof courseId !== "string") return;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { error } = await supabase
+    .from("reviews")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("course_id", courseId);
+  if (error) throw new Error(`deleteReview: ${error.message}`);
+
+  revalidatePath("/me");
+  const courseSlug = formData.get("course_slug");
+  if (typeof courseSlug === "string") {
+    revalidatePath(`/courses/${courseSlug}`);
+  }
+}
