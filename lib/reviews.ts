@@ -95,6 +95,20 @@ export async function countReviews(): Promise<number> {
   return count ?? 0;
 }
 
+export type TagCount = { tag: string; count: number };
+
+export function summarizeTags(reviews: Review[]): TagCount[] {
+  const counts = new Map<string, number>();
+  for (const r of reviews) {
+    for (const t of r.tags) {
+      counts.set(t, (counts.get(t) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
 export function summarizeReviews(reviews: Review[]): ReviewSummary {
   const pct = (key: "liked" | "useful" | "easy") => {
     const total = reviews.filter((r) => r[key] !== null).length;

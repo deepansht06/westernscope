@@ -5,8 +5,8 @@ import { listCourses, countCourses } from "@/lib/courses";
 import { countReviews } from "@/lib/reviews";
 
 export default async function Home() {
-  const [recent, total, totalReviews] = await Promise.all([
-    listCourses({ limit: 6 }),
+  const [featured, total, totalReviews] = await Promise.all([
+    listCourses({ sort: "popular", limit: 6 }),
     countCourses(),
     countReviews(),
   ]);
@@ -37,7 +37,7 @@ export default async function Home() {
       <section className="mt-16">
         <div className="flex items-baseline justify-between">
           <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-            Recent courses
+            {totalReviews > 0 ? "Most reviewed" : "Featured courses"}
           </h2>
           <Link
             href="/courses"
@@ -47,7 +47,7 @@ export default async function Home() {
           </Link>
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {recent.map((course) => (
+          {featured.map((course) => (
             <CourseCard key={course.id} course={course} />
           ))}
         </div>

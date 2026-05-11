@@ -1,4 +1,8 @@
-import { listReviewsForCourse, summarizeReviews } from "@/lib/reviews";
+import {
+  listReviewsForCourse,
+  summarizeReviews,
+  summarizeTags,
+} from "@/lib/reviews";
 import { tagLabel } from "@/lib/tags";
 
 export async function ReviewList({ courseId }: { courseId: string }) {
@@ -15,6 +19,7 @@ export async function ReviewList({ courseId }: { courseId: string }) {
   }
 
   const summary = summarizeReviews(reviews);
+  const tagCounts = summarizeTags(reviews);
 
   return (
     <div className="space-y-4">
@@ -27,6 +32,26 @@ export async function ReviewList({ courseId }: { courseId: string }) {
           <Bar label="Useful" pct={summary.useful} />
           <Bar label="Easy" pct={summary.easy} />
         </div>
+        {tagCounts.length > 0 && (
+          <div className="mt-4 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              Reviewers say
+            </div>
+            <div className="flex flex-wrap gap-1.5 text-xs">
+              {tagCounts.map((tc) => (
+                <span
+                  key={tc.tag}
+                  className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-0.5 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                >
+                  <span>{tagLabel(tc.tag)}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">
+                    · {tc.count}
+                  </span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       <ul className="space-y-3">
         {reviews.map((r) => (
