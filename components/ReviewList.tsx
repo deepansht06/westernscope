@@ -5,7 +5,13 @@ import {
 } from "@/lib/reviews";
 import { tagLabel } from "@/lib/tags";
 
-export async function ReviewList({ courseId }: { courseId: string }) {
+export async function ReviewList({
+  courseId,
+  excludeUserId,
+}: {
+  courseId: string;
+  excludeUserId?: string;
+}) {
   const reviews = await listReviewsForCourse(courseId);
 
   if (reviews.length === 0) {
@@ -20,6 +26,9 @@ export async function ReviewList({ courseId }: { courseId: string }) {
 
   const summary = summarizeReviews(reviews);
   const tagCounts = summarizeTags(reviews);
+  const visible = excludeUserId
+    ? reviews.filter((r) => r.user_id !== excludeUserId)
+    : reviews;
 
   return (
     <div className="space-y-4">
@@ -53,8 +62,13 @@ export async function ReviewList({ courseId }: { courseId: string }) {
           </div>
         )}
       </div>
+      {visible.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
+          No other reviews yet.
+        </div>
+      ) : (
       <ul className="space-y-3">
-        {reviews.map((r) => (
+        {visible.map((r) => (
           <li
             key={r.id}
             className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
@@ -92,6 +106,7 @@ export async function ReviewList({ courseId }: { courseId: string }) {
           </li>
         ))}
       </ul>
+      )}
     </div>
   );
 }

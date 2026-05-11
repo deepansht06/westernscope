@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { submitReview, type ReviewFormState } from "@/lib/actions/reviews";
 import { REVIEW_TAGS } from "@/lib/tags";
 
@@ -16,13 +16,18 @@ type Props = {
   courseId: string;
   courseSlug: string;
   existing: Existing;
+  onSaved?: () => void;
 };
 
-export function ReviewForm({ courseId, courseSlug, existing }: Props) {
+export function ReviewForm({ courseId, courseSlug, existing, onSaved }: Props) {
   const [state, action, pending] = useActionState<
     ReviewFormState | undefined,
     FormData
   >(submitReview, undefined);
+
+  useEffect(() => {
+    if (state?.ok && onSaved) onSaved();
+  }, [state, onSaved]);
 
   return (
     <form action={action} className="space-y-4">
