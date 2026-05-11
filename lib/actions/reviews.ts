@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isUwoEmail } from "@/lib/auth";
+import { isReviewTag } from "@/lib/tags";
 
 export type ReviewFormState = {
   ok?: boolean;
@@ -38,9 +39,23 @@ export async function submitReview(
   const liked = parseTriad(formData.get("liked"));
   const useful = parseTriad(formData.get("useful"));
   const easy = parseTriad(formData.get("easy"));
+  const tags = Array.from(
+    new Set(
+      formData
+        .getAll("tags")
+        .filter((v): v is string => typeof v === "string")
+        .filter(isReviewTag),
+    ),
+  );
 
-  if (!text && liked === null && useful === null && easy === null) {
-    return { error: "Add at least a thumbs rating or some text." };
+  if (
+    !text &&
+    liked === null &&
+    useful === null &&
+    easy === null &&
+    tags.length === 0
+  ) {
+    return { error: "Add at least a thumbs rating, a tag, or some text." };
   }
   if (text.length > 2000) {
     return { error: "Review is too long (max 2000 characters)." };
@@ -54,6 +69,7 @@ export async function submitReview(
       liked,
       useful,
       easy,
+      tags,
     },
     { onConflict: "user_id,course_id" },
   );

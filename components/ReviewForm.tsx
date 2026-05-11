@@ -2,12 +2,14 @@
 
 import { useActionState } from "react";
 import { submitReview, type ReviewFormState } from "@/lib/actions/reviews";
+import { REVIEW_TAGS } from "@/lib/tags";
 
 type Existing = {
   text: string | null;
   liked: boolean | null;
   useful: boolean | null;
   easy: boolean | null;
+  tags: string[];
 } | null;
 
 type Props = {
@@ -32,6 +34,22 @@ export function ReviewForm({ courseId, courseSlug, existing }: Props) {
         <Triad name="useful" label="Useful?" defaultValue={existing?.useful} />
         <Triad name="easy" label="Easy?" defaultValue={existing?.easy} />
       </div>
+
+      <fieldset>
+        <legend className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          Tags (optional)
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          {REVIEW_TAGS.map((tag) => (
+            <TagChip
+              key={tag.value}
+              value={tag.value}
+              label={tag.label}
+              defaultChecked={existing?.tags?.includes(tag.value) ?? false}
+            />
+          ))}
+        </div>
+      </fieldset>
 
       <div>
         <label
@@ -102,6 +120,31 @@ function Triad({
         <Option name={name} value="" label="Skip" defaultChecked={current === ""} />
       </div>
     </fieldset>
+  );
+}
+
+function TagChip({
+  value,
+  label,
+  defaultChecked,
+}: {
+  value: string;
+  label: string;
+  defaultChecked: boolean;
+}) {
+  return (
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        name="tags"
+        value={value}
+        defaultChecked={defaultChecked}
+        className="peer sr-only"
+      />
+      <span className="inline-block rounded-full border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-700 hover:border-zinc-400 peer-checked:border-[#4F2683] peer-checked:bg-[#4F2683] peer-checked:text-white dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600 dark:peer-checked:border-[#A78BFA] dark:peer-checked:bg-[#A78BFA] dark:peer-checked:text-zinc-950">
+        {label}
+      </span>
+    </label>
   );
 }
 

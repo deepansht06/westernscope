@@ -8,6 +8,7 @@ export type Review = {
   useful: boolean | null;
   easy: boolean | null;
   text: string | null;
+  tags: string[];
   created_at: string;
   updated_at: string;
 };
@@ -28,7 +29,7 @@ export async function listReviewsForCourse(courseId: string): Promise<Review[]> 
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, user_id, course_id, liked, useful, easy, text, created_at, updated_at",
+      "id, user_id, course_id, liked, useful, easy, text, tags, created_at, updated_at",
     )
     .eq("course_id", courseId)
     .order("created_at", { ascending: false });
@@ -44,7 +45,7 @@ export async function getMyReviewForCourse(
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, user_id, course_id, liked, useful, easy, text, created_at, updated_at",
+      "id, user_id, course_id, liked, useful, easy, text, tags, created_at, updated_at",
     )
     .eq("course_id", courseId)
     .eq("user_id", userId)
@@ -58,7 +59,7 @@ export async function listMyReviews(userId: string): Promise<MyReview[]> {
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, user_id, course_id, liked, useful, easy, text, created_at, updated_at, courses(code, title)",
+      "id, user_id, course_id, liked, useful, easy, text, tags, created_at, updated_at, courses(code, title)",
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
@@ -77,6 +78,7 @@ export async function listMyReviews(userId: string): Promise<MyReview[]> {
       useful: r.useful,
       easy: r.easy,
       text: r.text,
+      tags: Array.isArray(r.tags) ? r.tags : [],
       created_at: r.created_at,
       updated_at: r.updated_at,
       course: { code: course?.code ?? "", title: course?.title ?? "" },

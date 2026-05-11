@@ -2,6 +2,7 @@ import Link from "next/link";
 import { codeToSlug } from "@/lib/slug";
 import { deleteReview } from "@/lib/actions/reviews";
 import type { MyReview } from "@/lib/reviews";
+import { tagLabel } from "@/lib/tags";
 
 export function MyReviewCard({ review }: { review: MyReview }) {
   const slug = codeToSlug(review.course.code);
@@ -39,6 +40,19 @@ export function MyReviewCard({ review }: { review: MyReview }) {
         <p className="mt-3 whitespace-pre-line text-sm leading-6 text-zinc-800 dark:text-zinc-200">
           {review.text}
         </p>
+      )}
+
+      {review.tags.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
+          {review.tags.map((t) => (
+            <span
+              key={t}
+              className="rounded-full bg-zinc-100 px-2 py-0.5 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+            >
+              {tagLabel(t)}
+            </span>
+          ))}
+        </div>
       )}
 
       <div className="mt-3 flex items-center gap-4 text-sm">

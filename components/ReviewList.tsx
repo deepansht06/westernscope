@@ -1,4 +1,5 @@
 import { listReviewsForCourse, summarizeReviews } from "@/lib/reviews";
+import { tagLabel } from "@/lib/tags";
 
 export async function ReviewList({ courseId }: { courseId: string }) {
   const reviews = await listReviewsForCourse(courseId);
@@ -50,6 +51,18 @@ export async function ReviewList({ courseId }: { courseId: string }) {
               <p className="mt-2 whitespace-pre-line text-sm leading-6 text-zinc-800 dark:text-zinc-200">
                 {r.text}
               </p>
+            )}
+            {r.tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
+                {r.tags.map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-full bg-zinc-100 px-2 py-0.5 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                  >
+                    {tagLabel(t)}
+                  </span>
+                ))}
+              </div>
             )}
           </li>
         ))}
