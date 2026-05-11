@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { codeToSlug } from "@/lib/slug";
-import type { Course } from "@/lib/courses";
+import type { CourseWithStats } from "@/lib/courses";
 
-export function CourseCard({ course }: { course: Course }) {
+export function CourseCard({ course }: { course: CourseWithStats }) {
   return (
     <Link
       href={`/courses/${codeToSlug(course.code)}`}
@@ -26,6 +26,18 @@ export function CourseCard({ course }: { course: Course }) {
           {course.description}
         </p>
       )}
+      <div className="mt-3 flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+        <span>
+          {course.review_count === 0
+            ? "No reviews"
+            : `${course.review_count} ${course.review_count === 1 ? "review" : "reviews"}`}
+        </span>
+        {course.liked_pct !== null && (
+          <span className="rounded-full bg-green-100 px-2 py-0.5 font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
+            {course.liked_pct}% liked
+          </span>
+        )}
+      </div>
     </Link>
   );
 }
