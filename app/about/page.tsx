@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About — WesternScope",
+  title: "About",
   description:
     "WesternScope is an independent student-built course review site for Western University.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

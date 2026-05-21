@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import Link from "next/link";
 import { SearchInput } from "@/components/SearchInput";
 import { CourseCard } from "@/components/CourseCard";
 import { CourseFilters } from "@/components/CourseFilters";
@@ -6,6 +8,13 @@ import {
   type CourseSort,
   type YearLevel,
 } from "@/lib/courses";
+
+export const metadata: Metadata = {
+  title: "Courses",
+  description:
+    "Browse and search every Western University course on WesternScope. Filter by year level and sort by most reviewed or most liked.",
+  alternates: { canonical: "/courses" },
+};
 
 type SearchParams = {
   q?: string;
@@ -37,6 +46,9 @@ export default async function CoursesPage({
     hasReviews: reviewed === "1",
   });
 
+  const hasActiveFilters =
+    !!q?.trim() || !!parseYear(year) || reviewed === "1";
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
       <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -56,8 +68,33 @@ export default async function CoursesPage({
       </div>
 
       {courses.length === 0 ? (
-        <div className="mt-10 rounded-lg border border-dashed border-zinc-300 p-10 text-center text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-          No courses match your filters.
+        <div className="mt-10 rounded-lg border border-dashed border-zinc-300 p-10 text-center dark:border-zinc-700">
+          {hasActiveFilters ? (
+            <>
+              <p className="text-zinc-600 dark:text-zinc-400">
+                No courses match
+                {q?.trim() ? (
+                  <>
+                    {" "}
+                    “<span className="font-medium">{q.trim()}</span>”
+                  </>
+                ) : (
+                  " these filters"
+                )}
+                .
+              </p>
+              <Link
+                href="/courses"
+                className="mt-3 inline-block text-sm font-medium text-[#4F2683] hover:underline dark:text-[#A78BFA]"
+              >
+                Clear filters
+              </Link>
+            </>
+          ) : (
+            <p className="text-zinc-600 dark:text-zinc-400">
+              No courses yet. Check back soon.
+            </p>
+          )}
         </div>
       ) : (
         <div className="mt-6 grid gap-3 sm:grid-cols-2">

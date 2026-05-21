@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getCourseByCode } from "@/lib/courses";
 import { slugToCode } from "@/lib/slug";
+import { SITE_NAME } from "@/lib/site";
 import { getCurrentUser, isUwoEmail } from "@/lib/auth";
 import { getMyReviewForCourse } from "@/lib/reviews";
 import { ReviewList } from "@/components/ReviewList";
@@ -14,12 +15,33 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const code = slugToCode(slug);
-  if (!code) return { title: "Course not found — WesternScope" };
+  if (!code) return { title: "Course not found" };
   const course = await getCourseByCode(code);
-  if (!course) return { title: "Course not found — WesternScope" };
+  if (!course) return { title: "Course not found" };
+
+  const title = `${course.code} — ${course.title}`;
+  const description =
+    course.description?.slice(0, 160) ??
+    `Read student reviews for ${course.code} (${course.title}) at Western University on ${SITE_NAME}.`;
+  const url = `/courses/${slug}`;
+
   return {
-    title: `${course.code} — ${course.title} — WesternScope`,
-    description: course.description?.slice(0, 160) ?? undefined,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      siteName: SITE_NAME,
+      title: `${title} · ${SITE_NAME}`,
+      description,
+      url,
+      locale: "en_CA",
+    },
+    twitter: {
+      card: "summary",
+      title: `${title} · ${SITE_NAME}`,
+      description,
+    },
   };
 }
 

@@ -1,8 +1,7 @@
 import type { MetadataRoute } from "next";
 import { listCourses } from "@/lib/courses";
 import { codeToSlug } from "@/lib/slug";
-
-const BASE_URL = "https://westernscope.vercel.app";
+import { SITE_URL as BASE_URL } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const courses = await listCourses();
