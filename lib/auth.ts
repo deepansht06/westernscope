@@ -8,7 +8,3 @@ export const getCurrentUser = cache(async () => {
   } = await supabase.auth.getUser();
   return user;
 });
-
-export function isUwoEmail(email: string | null | undefined): boolean {
-  return !!email && email.toLowerCase().endsWith("@uwo.ca");
-}

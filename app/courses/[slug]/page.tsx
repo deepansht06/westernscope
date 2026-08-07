@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { getCourseByCode } from "@/lib/courses";
 import { slugToCode } from "@/lib/slug";
 import { SITE_NAME } from "@/lib/site";
-import { getCurrentUser, isUwoEmail } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { getMyReviewForCourse } from "@/lib/reviews";
 import { ReviewList } from "@/components/ReviewList";
 import { ReviewForm } from "@/components/ReviewForm";
@@ -54,7 +54,7 @@ export default async function CoursePage({ params }: Props) {
   if (!course) notFound();
 
   const user = await getCurrentUser();
-  const canReview = !!user && isUwoEmail(user.email);
+  const canReview = !!user;
   const myReview = canReview
     ? await getMyReviewForCourse(course.id, user!.id)
     : null;
@@ -162,16 +162,13 @@ export default async function CoursePage({ params }: Props) {
           <div className="mt-3">
             {!user && (
               <div className="rounded-lg border border-zinc-200 p-6 text-sm text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
-                Sign in with your{" "}
-                <span className="font-medium">@uwo.ca</span> email to post a
-                review.
-              </div>
-            )}
-            {user && !canReview && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
-                Reviews are limited to{" "}
-                <span className="font-medium">@uwo.ca</span> accounts. You&apos;re
-                signed in as {user.email}.
+                <Link
+                  href={`/sign-in?next=/courses/${slug}`}
+                  className="font-medium text-western-600 hover:underline dark:text-western-300"
+                >
+                  Sign in
+                </Link>{" "}
+                to post a review — it&apos;s free and takes a second.
               </div>
             )}
             {canReview && (

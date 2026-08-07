@@ -36,8 +36,8 @@ export default function AboutPage() {
           </h2>
           <ul className="mt-2 list-disc space-y-1 pl-6">
             <li>
-              Only verified <span className="font-medium">@uwo.ca</span>{" "}
-              accounts can post reviews.
+              Anyone can create a free account with a verified email and post
+              reviews.
             </li>
             <li>
               Reviews are shown anonymously. Your name and email are never

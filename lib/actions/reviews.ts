@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { isUwoEmail } from "@/lib/auth";
 import { isReviewTag } from "@/lib/tags";
 
 export type ReviewFormState = {
@@ -31,9 +30,8 @@ export async function submitReview(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "You need to sign in to post a review." };
-  if (!isUwoEmail(user.email)) {
-    return { error: "Only @uwo.ca accounts can post reviews." };
-  }
+  // (Open to any signed-in, verified account. The emailed-2FA step-up gate
+  // will be enforced here in B3.)
 
   const text = ((formData.get("text") as string | null) ?? "").trim();
   const liked = parseTriad(formData.get("liked"));

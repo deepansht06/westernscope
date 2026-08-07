@@ -5,12 +5,14 @@ import { HeroBackground } from "@/components/HeroBackground";
 import { AuthCard } from "@/components/AuthCard";
 import { listCourses, countCourses } from "@/lib/courses";
 import { countReviews } from "@/lib/reviews";
+import { getCurrentUser } from "@/lib/auth";
 
 export default async function Home() {
-  const [featured, total, totalReviews] = await Promise.all([
+  const [featured, total, totalReviews, user] = await Promise.all([
     listCourses({ sort: "popular", limit: 6 }),
     countCourses(),
     countReviews(),
+    getCurrentUser(),
   ]);
 
   return (
@@ -55,7 +57,7 @@ export default async function Home() {
           </div>
 
           <div className="animate-fade-up-delay lg:justify-self-end">
-            <AuthCard />
+            {user ? <HeroUserPanel email={user.email} /> : <AuthCard />}
           </div>
         </div>
       </section>
@@ -80,5 +82,35 @@ export default async function Home() {
         </div>
       </section>
     </>
+  );
+}
+
+function HeroUserPanel({ email }: { email: string | undefined }) {
+  return (
+    <div className="w-full max-w-sm rounded-2xl border border-black/5 bg-white p-6 shadow-2xl shadow-black/25 dark:border-white/10 dark:bg-zinc-900">
+      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-western-100 text-lg font-semibold text-western-700 dark:bg-western-950 dark:text-western-300">
+        {(email?.[0] ?? "?").toUpperCase()}
+      </div>
+      <p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+        Welcome back 👋
+      </p>
+      <p className="mt-1 truncate text-sm text-zinc-500 dark:text-zinc-400">
+        {email}
+      </p>
+      <div className="mt-5 space-y-2">
+        <Link
+          href="/courses"
+          className="block w-full rounded-lg bg-western-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition-colors hover:bg-western-700"
+        >
+          Browse courses
+        </Link>
+        <Link
+          href="/me"
+          className="block w-full rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-center text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-800"
+        >
+          My reviews
+        </Link>
+      </div>
+    </div>
   );
 }
