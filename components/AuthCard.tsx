@@ -59,8 +59,13 @@ export function AuthCard({ next = "/" }: { next?: string }) {
         setVerifySentTo(email.trim());
         return;
       }
-      // Login success.
       const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/";
+      if (res.needs2fa) {
+        // Untrusted device — go enter the emailed code.
+        router.push(`/verify?next=${encodeURIComponent(safeNext)}`);
+        return;
+      }
+      // Login success (trusted device or 2FA not required).
       router.push(safeNext);
       router.refresh();
     });

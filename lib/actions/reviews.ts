@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { twoFactorOk } from "@/lib/twofa";
 import { isReviewTag } from "@/lib/tags";
 
 export type ReviewFormState = {
@@ -30,8 +31,9 @@ export async function submitReview(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "You need to sign in to post a review." };
-  // (Open to any signed-in, verified account. The emailed-2FA step-up gate
-  // will be enforced here in B3.)
+  if (!(await twoFactorOk())) {
+    return { error: "Finish verifying your login before posting a review." };
+  }
 
   const text = ((formData.get("text") as string | null) ?? "").trim();
   const liked = parseTriad(formData.get("liked"));
@@ -87,6 +89,7 @@ export async function deleteReview(formData: FormData): Promise<void> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return;
+  if (!(await twoFactorOk())) return;
 
   const { error } = await supabase
     .from("reviews")

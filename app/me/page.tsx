@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
+import { twoFactorOk } from "@/lib/twofa";
 import { listMyReviews } from "@/lib/reviews";
 import { MyReviewCard } from "@/components/MyReviewCard";
 
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 export default async function MePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in?next=/me");
+  if (!(await twoFactorOk())) redirect("/verify?next=/me");
 
   const reviews = await listMyReviews(user.id);
 
