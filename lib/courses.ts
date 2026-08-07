@@ -6,6 +6,9 @@ export type Course = {
   title: string;
   description: string | null;
   prereqs: string | null;
+  antireqs: string | null;
+  extra_info: string | null;
+  campuses: string[] | null;
   faculty: string | null;
   credit_weight: number | null;
 };
@@ -34,21 +37,39 @@ export async function listCourses(
   // Stats are pre-aggregated by the `course_stats` view (see
   // supabase/migrations/0003_course_stats_view.sql) so we fetch one row per
   // course instead of scanning the entire reviews table on every request.
-  const { data, error } = await supabase
-    .from("course_stats")
-    .select(
-      "id, code, title, description, prereqs, faculty, credit_weight, review_count, liked_pct",
-    );
-  if (error) {
-    throw new Error(`listCourses: ${error.message}`);
+  //
+  // Search/sort/filter happen in JS below, so we need the *whole* catalog in
+  // hand. PostgREST caps a single response at 1000 rows, and with ~6.7k courses
+  // that silently hid most of them (and broke search for anything past the
+  // first page), so we page through with explicit ranges until exhausted.
+  const PAGE = 1000;
+  const select =
+    "id, code, title, description, prereqs, antireqs, extra_info, campuses, faculty, credit_weight, review_count, liked_pct";
+  type StatsRow = CourseWithStats & { review_count: number | null };
+  const data: StatsRow[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data: page, error } = await supabase
+      .from("course_stats")
+      .select(select)
+      .order("code", { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) {
+      throw new Error(`listCourses: ${error.message}`);
+    }
+    if (!page || page.length === 0) break;
+    data.push(...(page as unknown as StatsRow[]));
+    if (page.length < PAGE) break;
   }
 
-  let rows: CourseWithStats[] = (data ?? []).map((c) => ({
+  let rows: CourseWithStats[] = data.map((c) => ({
     id: c.id,
     code: c.code,
     title: c.title,
     description: c.description,
     prereqs: c.prereqs,
+    antireqs: c.antireqs,
+    extra_info: c.extra_info,
+    campuses: c.campuses,
     faculty: c.faculty,
     credit_weight: c.credit_weight,
     review_count: c.review_count ?? 0,
@@ -108,7 +129,9 @@ export async function getCourseByCode(code: string): Promise<Course | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("courses")
-    .select("id, code, title, description, prereqs, faculty, credit_weight")
+    .select(
+      "id, code, title, description, prereqs, antireqs, extra_info, campuses, faculty, credit_weight",
+    )
     .eq("code", code)
     .maybeSingle();
   if (error) throw new Error(`getCourseByCode: ${error.message}`);
