@@ -2,7 +2,7 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 /**
- * Service-role Supabase client for server-only work that must bypass RLS —
+ * Service-role Supabase client for server-only work that must bypass RLS -
  * specifically the `email_otp` and `trusted_devices` tables, which have RLS
  * enabled with no policies so no anon/authenticated client can reach them.
  *

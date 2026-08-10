@@ -23,7 +23,7 @@ export default function AboutPage() {
           <p className="mt-2">
             WesternScope is a course review site for Western University. It
             exists so Mustangs can read honest, anonymous notes from other
-            students before they enrol in a class — what the workload was
+            students before they enrol in a class - what the workload was
             actually like, whether the prof made it click, how much the final
             mattered. It is built and maintained by a Western student in their
             spare time.

@@ -65,7 +65,7 @@ function generateCode(): string {
   return String(randomInt(0, 1_000_000)).padStart(6, "0");
 }
 
-/** `base64url(json).hmac` — tamper-proof signed cookie value. */
+/** `base64url(json).hmac` - tamper-proof signed cookie value. */
 function makeSignedToken(obj: Record<string, unknown>): string {
   const body = Buffer.from(JSON.stringify(obj)).toString("base64url");
   return `${body}.${hmac(body)}`;
@@ -293,7 +293,7 @@ export async function clearTwoFactorPassed(): Promise<void> {
 }
 
 /**
- * Whether the current request has satisfied 2FA — either the signed cookie is
+ * Whether the current request has satisfied 2FA - either the signed cookie is
  * valid for this exact session, or the device is trusted.
  */
 async function twoFactorSatisfied(

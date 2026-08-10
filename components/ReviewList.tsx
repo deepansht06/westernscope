@@ -19,7 +19,7 @@ export async function ReviewList({
     return (
       <div className="rounded-lg border border-dashed border-zinc-300 p-8 text-center dark:border-zinc-700">
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          No reviews yet — be the first.
+          No reviews yet - be the first.
         </p>
       </div>
     );
@@ -124,7 +124,7 @@ function Bar({ label, avg }: { label: string; avg: number | null }) {
         />
       </div>
       <span className="text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
-        {avg != null ? avg.toFixed(1) : "—"}
+        {avg != null ? avg.toFixed(1) : "-"}
       </span>
     </div>
   );

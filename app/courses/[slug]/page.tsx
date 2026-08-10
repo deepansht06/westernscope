@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const course = await getCourseByCode(code);
   if (!course) return { title: "Course not found" };
 
-  const title = `${course.code} — ${course.title}`;
+  const title = `${course.code} - ${course.title}`;
   const description =
     course.description?.slice(0, 160) ??
     `Read student reviews for ${course.code} (${course.title}) at Western University on ${SITE_NAME}.`;
@@ -168,7 +168,7 @@ export default async function CoursePage({ params }: Props) {
                 >
                   Sign in
                 </Link>{" "}
-                to post a review — it&apos;s free and takes a second.
+                to post a review - it&apos;s free and takes a second.
               </div>
             )}
             {canReview && (

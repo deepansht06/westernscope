@@ -8,7 +8,7 @@ import { useEffect, useRef } from "react";
  * Layers (back to front): a deep-purple radial base, three blurred glow orbs
  * that float and parallax with the cursor, and a set of flowing SVG lines with
  * pulsing nodes. Purely decorative (aria-hidden), and all motion is disabled
- * under prefers-reduced-motion. No animation library — CSS keyframes (see
+ * under prefers-reduced-motion. No animation library - CSS keyframes (see
  * globals.css) plus a cheap rAF-throttled mousemove for the parallax.
  */
 export function HeroBackground() {

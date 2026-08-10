@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { AuthCard } from "@/components/AuthCard";
 
 export const metadata: Metadata = {
-  title: "Sign in — WesternScope",
+  title: "Sign in",
 };
 
 type Props = { searchParams: Promise<{ next?: string }> };

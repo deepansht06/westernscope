@@ -3,12 +3,13 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithPassword, signUpWithPassword } from "@/lib/actions/auth";
+import { createClient } from "@/lib/supabase/client";
 
 /**
  * Login / signup card (landing hero + /sign-in).
  *
  * Wired to Supabase email+password via server actions. Google OAuth (B4) and
- * the emailed-2FA step-up (B3) are not connected yet — the Google button shows
+ * the emailed-2FA step-up (B3) are not connected yet - the Google button shows
  * a "coming soon" note, and a successful password login currently goes straight
  * through (2FA will slot in at the signInWithPassword success path).
  */
@@ -36,6 +37,24 @@ export function AuthCard({ next = "/" }: { next?: string }) {
     setNotice(null);
   }
 
+  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/";
+
+  function handleGoogle() {
+    setError(null);
+    setNotice(null);
+    startTransition(async () => {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(safeNext)}`,
+        },
+      });
+      // On success the browser is redirected to Google; only errors return here.
+      if (error) setError(error.message);
+    });
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -61,7 +80,7 @@ export function AuthCard({ next = "/" }: { next?: string }) {
       }
       const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/";
       if (res.needs2fa) {
-        // Untrusted device — go enter the emailed code.
+        // Untrusted device - go enter the emailed code.
         router.push(`/verify?next=${encodeURIComponent(safeNext)}`);
         return;
       }
@@ -144,9 +163,7 @@ export function AuthCard({ next = "/" }: { next?: string }) {
             {!isSignup && (
               <button
                 type="button"
-                onClick={() =>
-                  setNotice("Password reset is coming with the next update.")
-                }
+                onClick={() => router.push("/forgot-password")}
                 className="text-xs font-medium text-western-600 hover:underline dark:text-western-300"
               >
                 Forgot?
@@ -211,8 +228,9 @@ export function AuthCard({ next = "/" }: { next?: string }) {
 
       <button
         type="button"
-        onClick={() => setNotice("Google sign-in is being connected — hang tight.")}
-        className="flex w-full items-center justify-center gap-2.5 rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-800"
+        onClick={handleGoogle}
+        disabled={pending}
+        className="flex w-full items-center justify-center gap-2.5 rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-800"
       >
         <GoogleIcon />
         Continue with Google

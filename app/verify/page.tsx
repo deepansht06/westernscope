@@ -5,7 +5,7 @@ import { twoFactorOk } from "@/lib/twofa";
 import { VerifyForm } from "@/components/VerifyForm";
 
 export const metadata: Metadata = {
-  title: "Verify it's you — WesternScope",
+  title: "Verify it's you",
 };
 
 type Props = { searchParams: Promise<{ next?: string }> };
@@ -20,7 +20,7 @@ export default async function VerifyPage({ searchParams }: Props) {
 
   const user = await getCurrentUser();
   if (!user) redirect(`/sign-in?next=${encodeURIComponent(dest)}`);
-  // Already verified (or trusted device) — nothing to do here.
+  // Already verified (or trusted device) - nothing to do here.
   if (await twoFactorOk()) redirect(dest);
 
   return (

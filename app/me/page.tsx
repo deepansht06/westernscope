@@ -7,7 +7,7 @@ import { listMyReviews } from "@/lib/reviews";
 import { MyReviewCard } from "@/components/MyReviewCard";
 
 export const metadata: Metadata = {
-  title: "My reviews — WesternScope",
+  title: "My reviews",
 };
 
 export default async function MePage() {

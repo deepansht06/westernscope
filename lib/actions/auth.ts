@@ -55,11 +55,48 @@ export async function signUpWithPassword(
   });
   if (error) return { error: error.message };
 
-  // With "Confirm email" enabled, Supabase returns no session until the user
-  // clicks the verification link. (An already-registered address also comes
-  // back with no session and an obfuscated user, so the UX message is the same
-  // either way — which avoids leaking whether an account exists.)
+  // Supabase obfuscates "already registered" to prevent enumeration: for an
+  // existing address it returns a user with an EMPTY identities array and no
+  // session. We surface that as a clear "already exists" message (a deliberate,
+  // user-requested tradeoff over strict anti-enumeration).
+  if (data.user && (data.user.identities?.length ?? 0) === 0) {
+    return {
+      error: "An account with this email already exists - log in instead.",
+    };
+  }
+
+  // With "Confirm email" enabled, a new signup has no session until the user
+  // clicks the verification link.
   if (!data.session) return { ok: true, needsVerification: true };
+  return { ok: true };
+}
+
+export async function requestPasswordReset(email: string): Promise<AuthResult> {
+  const e = email.trim().toLowerCase();
+  if (!EMAIL_RE.test(e)) return { error: "Enter a valid email address." };
+
+  const supabase = await createClient();
+  const origin = await siteOrigin();
+  await supabase.auth.resetPasswordForEmail(e, {
+    redirectTo: `${origin}/auth/callback?next=/reset-password`,
+  });
+  // Always report success - never reveal whether the address is registered.
+  return { ok: true };
+}
+
+export async function updatePassword(newPassword: string): Promise<AuthResult> {
+  if (newPassword.length < MIN_PASSWORD) {
+    return { error: `Password must be at least ${MIN_PASSWORD} characters.` };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "This reset link has expired - request a new one." };
+  }
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) return { error: error.message };
   return { ok: true };
 }
 
@@ -81,7 +118,7 @@ export async function signInWithPassword(
     const msg = error.message.toLowerCase();
     if (msg.includes("not confirmed")) {
       return {
-        error: "Verify your email first — check your inbox for the link.",
+        error: "Verify your email first - check your inbox for the link.",
         needsVerification: true,
       };
     }
@@ -106,7 +143,7 @@ export async function signInWithPassword(
     await issueLoginCode(user.id, user.email ?? e);
   } catch {
     return {
-      error: "Couldn't send your verification code — please try again.",
+      error: "Couldn't send your verification code - please try again.",
     };
   }
   return { needs2fa: true };
@@ -124,15 +161,15 @@ export async function verifyTwoFactor(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: "Your session expired — please log in again." };
+  if (!user) return { error: "Your session expired - please log in again." };
 
   const result = await verifyLoginCode(user.id, clean);
   if (!result.ok) {
     const messages: Record<typeof result.reason, string> = {
       invalid: "That code isn't right. Try again.",
-      expired: "That code expired — request a new one.",
-      locked: "Too many attempts — request a new code.",
-      none: "No active code — request a new one.",
+      expired: "That code expired - request a new one.",
+      locked: "Too many attempts - request a new code.",
+      none: "No active code - request a new one.",
     };
     return { error: messages[result.reason] };
   }
@@ -152,12 +189,12 @@ export async function resendTwoFactorCode(): Promise<AuthResult> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: "Your session expired — please log in again." };
+  if (!user) return { error: "Your session expired - please log in again." };
 
   try {
     await issueLoginCode(user.id, user.email ?? "");
   } catch {
-    return { error: "Couldn't resend the code — try again shortly." };
+    return { error: "Couldn't resend the code - try again shortly." };
   }
   return { ok: true };
 }
