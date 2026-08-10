@@ -10,10 +10,10 @@ export type ReviewFormState = {
   error?: string;
 };
 
-function parseTriad(v: FormDataEntryValue | null): boolean | null {
-  if (v === "yes") return true;
-  if (v === "no") return false;
-  return null;
+function parseRating(v: FormDataEntryValue | null): number | null {
+  if (typeof v !== "string") return null;
+  const n = Number.parseInt(v, 10);
+  return n >= 1 && n <= 5 ? n : null;
 }
 
 export async function submitReview(
@@ -36,9 +36,9 @@ export async function submitReview(
   }
 
   const text = ((formData.get("text") as string | null) ?? "").trim();
-  const liked = parseTriad(formData.get("liked"));
-  const useful = parseTriad(formData.get("useful"));
-  const easy = parseTriad(formData.get("easy"));
+  const liked = parseRating(formData.get("liked"));
+  const useful = parseRating(formData.get("useful"));
+  const difficulty = parseRating(formData.get("difficulty"));
   const tags = Array.from(
     new Set(
       formData
@@ -52,10 +52,10 @@ export async function submitReview(
     !text &&
     liked === null &&
     useful === null &&
-    easy === null &&
+    difficulty === null &&
     tags.length === 0
   ) {
-    return { error: "Add at least a thumbs rating, a tag, or some text." };
+    return { error: "Add at least a rating, a tag, or some text." };
   }
   if (text.length > 2000) {
     return { error: "Review is too long (max 2000 characters)." };
@@ -68,7 +68,7 @@ export async function submitReview(
       text: text || null,
       liked,
       useful,
-      easy,
+      difficulty,
       tags,
     },
     { onConflict: "user_id,course_id" },

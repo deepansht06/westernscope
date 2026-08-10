@@ -4,9 +4,9 @@ export type Review = {
   id: string;
   user_id: string;
   course_id: string;
-  liked: boolean | null;
-  useful: boolean | null;
-  easy: boolean | null;
+  liked: number | null; // 1-5, 5 = loved it
+  useful: number | null; // 1-5, 5 = very useful
+  difficulty: number | null; // 1-5, 5 = hardest
   text: string | null;
   tags: string[];
   created_at: string;
@@ -15,9 +15,9 @@ export type Review = {
 
 export type ReviewSummary = {
   count: number;
-  liked: number;
-  useful: number;
-  easy: number;
+  likedAvg: number | null;
+  usefulAvg: number | null;
+  difficultyAvg: number | null;
 };
 
 export type MyReview = Review & {
@@ -29,7 +29,7 @@ export async function listReviewsForCourse(courseId: string): Promise<Review[]> 
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, user_id, course_id, liked, useful, easy, text, tags, created_at, updated_at",
+      "id, user_id, course_id, liked, useful, difficulty, text, tags, created_at, updated_at",
     )
     .eq("course_id", courseId)
     .order("created_at", { ascending: false });
@@ -45,7 +45,7 @@ export async function getMyReviewForCourse(
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, user_id, course_id, liked, useful, easy, text, tags, created_at, updated_at",
+      "id, user_id, course_id, liked, useful, difficulty, text, tags, created_at, updated_at",
     )
     .eq("course_id", courseId)
     .eq("user_id", userId)
@@ -59,7 +59,7 @@ export async function listMyReviews(userId: string): Promise<MyReview[]> {
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, user_id, course_id, liked, useful, easy, text, tags, created_at, updated_at, courses(code, title)",
+      "id, user_id, course_id, liked, useful, difficulty, text, tags, created_at, updated_at, courses(code, title)",
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
@@ -76,7 +76,7 @@ export async function listMyReviews(userId: string): Promise<MyReview[]> {
       course_id: r.course_id,
       liked: r.liked,
       useful: r.useful,
-      easy: r.easy,
+      difficulty: r.difficulty,
       text: r.text,
       tags: Array.isArray(r.tags) ? r.tags : [],
       created_at: r.created_at,
@@ -110,16 +110,17 @@ export function summarizeTags(reviews: Review[]): TagCount[] {
 }
 
 export function summarizeReviews(reviews: Review[]): ReviewSummary {
-  const pct = (key: "liked" | "useful" | "easy") => {
-    const total = reviews.filter((r) => r[key] !== null).length;
-    if (total === 0) return 0;
-    const yes = reviews.filter((r) => r[key] === true).length;
-    return Math.round((yes / total) * 100);
+  const avg = (key: "liked" | "useful" | "difficulty") => {
+    const vals = reviews
+      .map((r) => r[key])
+      .filter((v): v is number => typeof v === "number");
+    if (vals.length === 0) return null;
+    return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
   };
   return {
     count: reviews.length,
-    liked: pct("liked"),
-    useful: pct("useful"),
-    easy: pct("easy"),
+    likedAvg: avg("liked"),
+    usefulAvg: avg("useful"),
+    difficultyAvg: avg("difficulty"),
   };
 }

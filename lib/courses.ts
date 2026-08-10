@@ -15,7 +15,9 @@ export type Course = {
 
 export type CourseWithStats = Course & {
   review_count: number;
-  liked_pct: number | null;
+  liked_avg: number | null;
+  useful_avg: number | null;
+  difficulty_avg: number | null;
 };
 
 export type CourseSort = "code" | "popular" | "liked";
@@ -44,7 +46,7 @@ export async function listCourses(
   // first page), so we page through with explicit ranges until exhausted.
   const PAGE = 1000;
   const select =
-    "id, code, title, description, prereqs, antireqs, extra_info, campuses, faculty, credit_weight, review_count, liked_pct";
+    "id, code, title, description, prereqs, antireqs, extra_info, campuses, faculty, credit_weight, review_count, liked_avg, useful_avg, difficulty_avg";
   type StatsRow = CourseWithStats & { review_count: number | null };
   const data: StatsRow[] = [];
   for (let from = 0; ; from += PAGE) {
@@ -73,7 +75,9 @@ export async function listCourses(
     faculty: c.faculty,
     credit_weight: c.credit_weight,
     review_count: c.review_count ?? 0,
-    liked_pct: c.liked_pct ?? null,
+    liked_avg: c.liked_avg ?? null,
+    useful_avg: c.useful_avg ?? null,
+    difficulty_avg: c.difficulty_avg ?? null,
   }));
 
   if (opts.q) {
@@ -114,7 +118,7 @@ export async function listCourses(
   } else if (sort === "liked") {
     rows.sort(
       (a, b) =>
-        (b.liked_pct ?? -1) - (a.liked_pct ?? -1) ||
+        (b.liked_avg ?? -1) - (a.liked_avg ?? -1) ||
         b.review_count - a.review_count ||
         a.code.localeCompare(b.code),
     );
