@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="13" fill="#ffffff"/>
+  <text x="31" y="45" text-anchor="middle" fill="#4f2683"
+        font-family="Arial, Helvetica, sans-serif" font-size="33" font-weight="900"
+        font-style="italic" letter-spacing="-2.5"
+        transform="skewX(-6) translate(3.2 0)">WS</text>
+</svg>

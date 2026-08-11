@@ -1,15 +1,32 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Design tokens
+   - Western purple brand scale (anchored on the official #4F2683).
+   - Fonts map to the Geist faces loaded in layout.tsx. NOTE: the old rule here
+     hard-set `body { font-family: Arial }`, which silently overrode Geist for
+     the entire site. Do not reintroduce a body font-family override.
+--------------------------------------------------------------------------- */
+@theme {
+  --color-western-50: #f5f3fa;
+  --color-western-100: #eae4f4;
+  --color-western-200: #d5c9e9;
+  --color-western-300: #b8a3da; /* dark-mode text accent */
+  --color-western-400: #9670c4;
+  --color-western-500: #6f43a3;
+  --color-western-600: #4f2683; /* brand */
+  --color-western-700: #41206c;
+  --color-western-800: #351b56;
+  --color-western-900: #2b1747;
+  --color-western-950: #1b0e2e;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +36,44 @@
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ---------------------------------------------------------------------------
+   Landing hero animations (used by components/HeroBackground.tsx).
+   All are disabled under prefers-reduced-motion.
+--------------------------------------------------------------------------- */
+@keyframes hero-flow {
+  to { stroke-dashoffset: -600; }
+}
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-18px); }
+}
+@keyframes hero-drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(16px); }
+}
+@keyframes hero-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.85; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-hero-flow { animation: hero-flow 9s linear infinite; }
+.animate-hero-float { animation: hero-float 8s ease-in-out infinite; }
+.animate-hero-drift { animation: hero-drift 11s ease-in-out infinite; }
+.animate-hero-pulse { animation: hero-pulse 6s ease-in-out infinite; }
+.animate-fade-up { animation: fade-up 0.6s ease-out both; }
+.animate-fade-up-delay { animation: fade-up 0.6s ease-out 0.12s both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-flow,
+  .animate-hero-float,
+  .animate-hero-drift,
+  .animate-hero-pulse,
+  .animate-fade-up,
+  .animate-fade-up-delay {
+    animation: none !important;
+  }
 }

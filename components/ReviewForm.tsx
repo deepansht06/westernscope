@@ -1,14 +1,14 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { submitReview, type ReviewFormState } from "@/lib/actions/reviews";
 import { REVIEW_TAGS } from "@/lib/tags";
 
 type Existing = {
   text: string | null;
-  liked: boolean | null;
-  useful: boolean | null;
-  easy: boolean | null;
+  liked: number | null;
+  useful: number | null;
+  difficulty: number | null;
   tags: string[];
 } | null;
 
@@ -18,6 +18,12 @@ type Props = {
   existing: Existing;
   onSaved?: () => void;
 };
+
+const SCALES = [
+  { name: "liked", label: "Liked it?", low: "Not for me", high: "Loved it" },
+  { name: "useful", label: "Useful?", low: "Not useful", high: "Very useful" },
+  { name: "difficulty", label: "Difficulty?", low: "Very easy", high: "Very hard" },
+] as const;
 
 export function ReviewForm({ courseId, courseSlug, existing, onSaved }: Props) {
   const [state, action, pending] = useActionState<
@@ -30,14 +36,21 @@ export function ReviewForm({ courseId, courseSlug, existing, onSaved }: Props) {
   }, [state, onSaved]);
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} className="space-y-5">
       <input type="hidden" name="course_id" value={courseId} />
       <input type="hidden" name="course_slug" value={courseSlug} />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Triad name="liked" label="Liked it?" defaultValue={existing?.liked} />
-        <Triad name="useful" label="Useful?" defaultValue={existing?.useful} />
-        <Triad name="easy" label="Easy?" defaultValue={existing?.easy} />
+      <div className="grid gap-5 sm:grid-cols-3">
+        {SCALES.map((s) => (
+          <Scale
+            key={s.name}
+            name={s.name}
+            label={s.label}
+            low={s.low}
+            high={s.high}
+            defaultValue={existing?.[s.name] ?? null}
+          />
+        ))}
       </div>
 
       <fieldset>
@@ -70,7 +83,7 @@ export function ReviewForm({ courseId, courseSlug, existing, onSaved }: Props) {
           maxLength={2000}
           defaultValue={existing?.text ?? ""}
           placeholder="What did you think? Workload, profs, what helped you do well…"
-          className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#4F2683] focus:outline-none focus:ring-1 focus:ring-[#4F2683] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+          className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-western-600 focus:outline-none focus:ring-1 focus:ring-western-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500"
         />
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
           Reviews are shown anonymously. Your name and email are never displayed.
@@ -81,7 +94,7 @@ export function ReviewForm({ courseId, courseSlug, existing, onSaved }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center rounded-md bg-[#4F2683] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#3F1F6A] disabled:opacity-50"
+          className="inline-flex items-center rounded-md bg-western-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-western-700 disabled:opacity-50"
         >
           {pending ? "Saving…" : existing ? "Update review" : "Post review"}
         </button>
@@ -100,29 +113,55 @@ export function ReviewForm({ courseId, courseSlug, existing, onSaved }: Props) {
   );
 }
 
-function Triad({
+/** 1-5 rating: five rounded, selectable rectangles. Click again to clear. */
+function Scale({
   name,
   label,
+  low,
+  high,
   defaultValue,
 }: {
   name: string;
   label: string;
-  defaultValue: boolean | null | undefined;
+  low: string;
+  high: string;
+  defaultValue: number | null;
 }) {
-  const current =
-    defaultValue === true ? "yes" : defaultValue === false ? "no" : "";
+  const [value, setValue] = useState<number | null>(defaultValue);
+
   return (
     <fieldset>
-      <legend className="mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+      <legend className="mb-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300">
         {label}
       </legend>
-      <div
-        role="radiogroup"
-        className="flex overflow-hidden rounded-md border border-zinc-300 dark:border-zinc-700"
-      >
-        <Option name={name} value="yes" label="Yes" defaultChecked={current === "yes"} />
-        <Option name={name} value="no" label="No" defaultChecked={current === "no"} />
-        <Option name={name} value="" label="Skip" defaultChecked={current === ""} />
+      {/* The value the server reads; empty string = skipped. */}
+      <input type="hidden" name={name} value={value ?? ""} />
+      <div className="flex gap-1.5" role="radiogroup" aria-label={label}>
+        {[1, 2, 3, 4, 5].map((n) => {
+          const active = value === n;
+          return (
+            <button
+              key={n}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              aria-label={`${label} ${n} of 5`}
+              onClick={() => setValue((v) => (v === n ? null : n))}
+              className={
+                "flex h-10 flex-1 items-center justify-center rounded-lg border text-sm font-semibold transition-colors " +
+                (active
+                  ? "border-western-600 bg-western-600 text-white shadow-sm"
+                  : "border-zinc-300 bg-white text-zinc-600 hover:border-western-400 hover:text-western-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-western-400")
+              }
+            >
+              {n}
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-1 flex justify-between text-[11px] text-zinc-400 dark:text-zinc-500">
+        <span>{low}</span>
+        <span>{high}</span>
       </div>
     </fieldset>
   );
@@ -146,34 +185,7 @@ function TagChip({
         defaultChecked={defaultChecked}
         className="peer sr-only"
       />
-      <span className="inline-block rounded-full border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-700 hover:border-zinc-400 peer-checked:border-[#4F2683] peer-checked:bg-[#4F2683] peer-checked:text-white dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600 dark:peer-checked:border-[#A78BFA] dark:peer-checked:bg-[#A78BFA] dark:peer-checked:text-zinc-950">
-        {label}
-      </span>
-    </label>
-  );
-}
-
-function Option({
-  name,
-  value,
-  label,
-  defaultChecked,
-}: {
-  name: string;
-  value: string;
-  label: string;
-  defaultChecked: boolean;
-}) {
-  return (
-    <label className="flex-1 cursor-pointer">
-      <input
-        type="radio"
-        name={name}
-        value={value}
-        defaultChecked={defaultChecked}
-        className="peer sr-only"
-      />
-      <span className="block border-l border-zinc-300 px-3 py-1.5 text-center text-sm text-zinc-600 first:border-l-0 hover:bg-zinc-50 peer-checked:bg-[#4F2683] peer-checked:text-white peer-focus:ring-1 peer-focus:ring-[#4F2683] dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900">
+      <span className="inline-block rounded-full border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-700 hover:border-zinc-400 peer-checked:border-western-600 peer-checked:bg-western-600 peer-checked:text-white dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600 dark:peer-checked:border-western-400 dark:peer-checked:bg-western-500 dark:peer-checked:text-white">
         {label}
       </span>
     </label>

@@ -23,7 +23,7 @@ export default function AboutPage() {
           <p className="mt-2">
             WesternScope is a course review site for Western University. It
             exists so Mustangs can read honest, anonymous notes from other
-            students before they enrol in a class — what the workload was
+            students before they enrol in a class - what the workload was
             actually like, whether the prof made it click, how much the final
             mattered. It is built and maintained by a Western student in their
             spare time.
@@ -36,8 +36,8 @@ export default function AboutPage() {
           </h2>
           <ul className="mt-2 list-disc space-y-1 pl-6">
             <li>
-              Only verified <span className="font-medium">@uwo.ca</span>{" "}
-              accounts can post reviews.
+              Anyone can create a free account with a verified email and post
+              reviews.
             </li>
             <li>
               Reviews are shown anonymously. Your name and email are never

@@ -18,7 +18,7 @@ export async function createClient() {
               cookieStore.set(name, value, options),
             );
           } catch {
-            // Called from a Server Component — cookies can't be set here.
+            // Called from a Server Component - cookies can't be set here.
             // Safe to ignore if a proxy is refreshing user sessions.
           }
         },

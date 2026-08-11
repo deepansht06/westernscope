@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { isUwoEmail } from "@/lib/auth";
+import { twoFactorOk } from "@/lib/twofa";
 import { isReviewTag } from "@/lib/tags";
 
 export type ReviewFormState = {
@@ -10,10 +10,10 @@ export type ReviewFormState = {
   error?: string;
 };
 
-function parseTriad(v: FormDataEntryValue | null): boolean | null {
-  if (v === "yes") return true;
-  if (v === "no") return false;
-  return null;
+function parseRating(v: FormDataEntryValue | null): number | null {
+  if (typeof v !== "string") return null;
+  const n = Number.parseInt(v, 10);
+  return n >= 1 && n <= 5 ? n : null;
 }
 
 export async function submitReview(
@@ -31,14 +31,14 @@ export async function submitReview(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "You need to sign in to post a review." };
-  if (!isUwoEmail(user.email)) {
-    return { error: "Only @uwo.ca accounts can post reviews." };
+  if (!(await twoFactorOk())) {
+    return { error: "Finish verifying your login before posting a review." };
   }
 
   const text = ((formData.get("text") as string | null) ?? "").trim();
-  const liked = parseTriad(formData.get("liked"));
-  const useful = parseTriad(formData.get("useful"));
-  const easy = parseTriad(formData.get("easy"));
+  const liked = parseRating(formData.get("liked"));
+  const useful = parseRating(formData.get("useful"));
+  const difficulty = parseRating(formData.get("difficulty"));
   const tags = Array.from(
     new Set(
       formData
@@ -52,10 +52,10 @@ export async function submitReview(
     !text &&
     liked === null &&
     useful === null &&
-    easy === null &&
+    difficulty === null &&
     tags.length === 0
   ) {
-    return { error: "Add at least a thumbs rating, a tag, or some text." };
+    return { error: "Add at least a rating, a tag, or some text." };
   }
   if (text.length > 2000) {
     return { error: "Review is too long (max 2000 characters)." };
@@ -68,7 +68,7 @@ export async function submitReview(
       text: text || null,
       liked,
       useful,
-      easy,
+      difficulty,
       tags,
     },
     { onConflict: "user_id,course_id" },
@@ -89,6 +89,7 @@ export async function deleteReview(formData: FormData): Promise<void> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return;
+  if (!(await twoFactorOk())) return;
 
   const { error } = await supabase
     .from("reviews")

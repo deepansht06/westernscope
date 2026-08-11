@@ -3,6 +3,7 @@ import { codeToSlug } from "@/lib/slug";
 import { deleteReview } from "@/lib/actions/reviews";
 import type { MyReview } from "@/lib/reviews";
 import { tagLabel } from "@/lib/tags";
+import { ReviewRatings } from "@/components/ReviewRatings";
 
 export function MyReviewCard({ review }: { review: MyReview }) {
   const slug = codeToSlug(review.course.code);
@@ -28,12 +29,12 @@ export function MyReviewCard({ review }: { review: MyReview }) {
         </time>
       </div>
 
-      <div className="mt-2 flex flex-wrap gap-2 text-xs">
-        {review.liked === true && <Tag color="green">Liked</Tag>}
-        {review.liked === false && <Tag color="red">Disliked</Tag>}
-        {review.useful === true && <Tag>Useful</Tag>}
-        {review.easy === true && <Tag>Easy</Tag>}
-        {review.easy === false && <Tag color="amber">Hard</Tag>}
+      <div className="mt-2">
+        <ReviewRatings
+          liked={review.liked}
+          useful={review.useful}
+          difficulty={review.difficulty}
+        />
       </div>
 
       {review.text && (
@@ -74,25 +75,5 @@ export function MyReviewCard({ review }: { review: MyReview }) {
         </form>
       </div>
     </li>
-  );
-}
-
-function Tag({
-  children,
-  color = "zinc",
-}: {
-  children: React.ReactNode;
-  color?: "zinc" | "green" | "red" | "amber";
-}) {
-  const palette = {
-    zinc: "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300",
-    green: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300",
-    red: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300",
-    amber: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
-  }[color];
-  return (
-    <span className={`rounded-full px-2 py-0.5 font-medium ${palette}`}>
-      {children}
-    </span>
   );
 }

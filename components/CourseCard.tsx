@@ -32,9 +32,9 @@ export function CourseCard({ course }: { course: CourseWithStats }) {
             ? "No reviews"
             : `${course.review_count} ${course.review_count === 1 ? "review" : "reviews"}`}
         </span>
-        {course.liked_pct !== null && (
-          <span className="rounded-full bg-green-100 px-2 py-0.5 font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
-            {course.liked_pct}% liked
+        {course.liked_avg !== null && (
+          <span className="rounded-full bg-western-100 px-2 py-0.5 font-medium text-western-700 dark:bg-western-950 dark:text-western-300">
+            ★ {course.liked_avg.toFixed(1)} liked
           </span>
         )}
       </div>
