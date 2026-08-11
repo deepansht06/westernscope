@@ -62,11 +62,22 @@ export default function AboutPage() {
             Where the course data comes from
           </h2>
           <p className="mt-2">
-            Course titles, descriptions, prerequisites, and credit weights are
-            sourced from the Western Academic Calendar. We have reached out to
-            the Office of the Registrar regarding terms of use and are
-            currently awaiting a response; the site will be updated to reflect
-            their guidance once received.
+            Course titles, descriptions, prerequisites, antirequisites, credit
+            weights, and campus availability come from an official export of the
+            Western Academic Calendar, provided directly by Western&rsquo;s
+            Office of the Registrar. The catalog currently covers roughly 6,700
+            courses across the Main, Huron, and King&rsquo;s campuses.
+          </p>
+          <p className="mt-2">
+            Calendar data can change between terms. If you spot something out of
+            date or missing, let us know on the{" "}
+            <Link
+              href="/contact"
+              className="font-medium text-[#4F2683] hover:underline dark:text-[#A78BFA]"
+            >
+              contact page
+            </Link>{" "}
+            and we will get it corrected.
           </p>
         </section>
 
@@ -95,15 +106,20 @@ export default function AboutPage() {
             Contact
           </h2>
           <p className="mt-2">
-            Found a bug, want a course or faculty added, or have a removal
-            request? Open an issue on{" "}
-            <a
-              href="https://github.com/deepansht06/westernscope/issues"
-              target="_blank"
-              rel="noreferrer"
+            Found a bug, want a course added, or have a removal request? Head to
+            the{" "}
+            <Link
+              href="/contact"
               className="font-medium text-[#4F2683] hover:underline dark:text-[#A78BFA]"
             >
-              GitHub
+              contact page
+            </Link>{" "}
+            or email{" "}
+            <a
+              href="mailto:dthakur5@uwo.ca"
+              className="font-medium text-[#4F2683] hover:underline dark:text-[#A78BFA]"
+            >
+              dthakur5@uwo.ca
             </a>
             .
           </p>

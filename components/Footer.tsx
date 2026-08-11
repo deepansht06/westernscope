@@ -15,6 +15,12 @@ export function Footer() {
           >
             About
           </Link>
+          <Link
+            href="/contact"
+            className="hover:text-zinc-900 dark:hover:text-zinc-50"
+          >
+            Contact
+          </Link>
           <a
             href="https://github.com/deepansht06/westernscope"
             target="_blank"
