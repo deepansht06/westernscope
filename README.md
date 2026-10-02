@@ -1,6 +1,7 @@
 # WesternScope
 
 A course review and information site for Western University, inspired by [uwflow.com](https://uwflow.com).
+* Currently not published to a domain. Current version available at: https://westernscope.vercel.app/
 
 ## What it does (v1 goals)
 
